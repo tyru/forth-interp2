@@ -51,7 +51,7 @@ forth_pop_value(const std::string& callee)
 }
 
 void
-word_plus()
+word_add()
 {
     ForthValue x = forth_pop_value("+");
     ForthValue y = forth_pop_value("+");
@@ -60,7 +60,7 @@ word_plus()
 }
 
 void
-word_minus()
+word_subtract()
 {
     ForthValue x = forth_pop_value("-");
     ForthValue y = forth_pop_value("-");
@@ -98,8 +98,8 @@ forth_init_words()
 {
     forth_words.clear();
 
-    forth_words["+"] = word_plus;
-    forth_words["-"] = word_minus;
+    forth_words["+"] = word_add;
+    forth_words["-"] = word_subtract;
     forth_words["*"] = word_multiply;
     forth_words["/"] = word_divide;
     forth_words["."] = word_print;
