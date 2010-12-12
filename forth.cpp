@@ -73,6 +73,7 @@ forth_run(const std::string& code)
     while (1) {
         ss >> token;
         if (!ss) break;
+        // std::cerr << "[debug]:" << token << std::endl;
         if (forth_words.find(token) != forth_words.end()) {
             try {
                 forth_words[token]();
