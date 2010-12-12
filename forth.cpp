@@ -26,9 +26,9 @@ typedef std::map<std::string, WordFn> ForthWordMap;
 
 
 
-struct StackUnderflow
-{
-    StackUnderflow(const std::string& msg)
+
+struct ForthInterpException {
+    ForthInterpException(const std::string& msg)
         : msg_(msg) {}
 
     std::string what() throw() { return msg_; }
@@ -37,7 +37,19 @@ private:
     std::string msg_;
 };
 
-struct DivideByZero {};
+struct StackUnderflow
+    : public ForthInterpException
+{
+    StackUnderflow(const std::string& msg)
+        : ForthInterpException(msg + ": no more items on the stack.") {}
+};
+
+struct DivideByZero
+    : public ForthInterpException
+{
+    DivideByZero()
+        : ForthInterpException("divide by zero.") {}
+};
 
 
 
@@ -135,11 +147,8 @@ public:
                 try {
                     words_[token](stack_);
                 }
-                catch (StackUnderflow& e) {
-                    std::cerr << "[error]: " << e.what() << ": no more items on the stack." << std::endl;
-                }
-                catch (DivideByZero& e) {
-                    std::cerr << "[error]: divide by zero." << std::endl;
+                catch (ForthInterpException& e) {
+                    std::cerr << "[error]: " << e.what() << std::endl;
                 }
             }
             else {
