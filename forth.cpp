@@ -23,9 +23,9 @@ typedef void (*WordFn)();
 std::map<std::string, WordFn> forth_words;
 
 
-struct forth_stack_underflow
+struct stack_underflow
 {
-    forth_stack_underflow(const std::string& msg)
+    stack_underflow(const std::string& msg)
         : msg_(msg) {}
 
     std::string what() throw() { return msg_; }
@@ -41,7 +41,7 @@ struct divide_by_zero {};
 ForthValue
 forth_pop_value(const std::string& callee)
 {
-    if (forth_stack.empty()) throw forth_stack_underflow(callee);
+    if (forth_stack.empty()) throw stack_underflow(callee);
     ForthValue value = forth_stack.top();
     forth_stack.pop();
     return value;
@@ -116,7 +116,7 @@ forth_run(const std::string& code)
             try {
                 forth_words[token]();
             }
-            catch (forth_stack_underflow& e) {
+            catch (stack_underflow& e) {
                 std::cerr << e.what() << ": no more items on the stack." << std::endl;
             }
             catch (divide_by_zero& e) {
