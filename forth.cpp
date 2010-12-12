@@ -34,6 +34,9 @@ private:
     std::string msg_;
 };
 
+struct divide_by_zero {};
+
+
 
 ForthValue
 forth_pop_value(const std::string& callee)
@@ -54,6 +57,34 @@ word_plus()
 }
 
 void
+word_minus()
+{
+    ForthValue x = forth_pop_value("-");
+    ForthValue y = forth_pop_value("-");
+
+    forth_stack.push(x - y);
+}
+
+void
+word_multiply()
+{
+    ForthValue x = forth_pop_value("*");
+    ForthValue y = forth_pop_value("*");
+
+    forth_stack.push(x * y);
+}
+
+void
+word_divide()
+{
+    ForthValue x = forth_pop_value("/");
+    ForthValue y = forth_pop_value("/");
+
+    if (y == 0) throw divide_by_zero();
+    forth_stack.push(x / y);
+}
+
+void
 word_print()
 {
     std::cout << forth_pop_value(".");
@@ -65,6 +96,9 @@ forth_init_words()
     forth_words.clear();
 
     forth_words["+"] = word_plus;
+    forth_words["-"] = word_minus;
+    forth_words["*"] = word_multiply;
+    forth_words["/"] = word_divide;
     forth_words["."] = word_print;
 }
 
@@ -84,6 +118,9 @@ forth_run(const std::string& code)
             }
             catch (forth_stack_underflow& e) {
                 std::cerr << e.what() << ": no more items on the stack." << std::endl;
+            }
+            catch (divide_by_zero& e) {
+                std::cerr << "divide by zero." << std::endl;
             }
         }
         else {
