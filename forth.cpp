@@ -70,8 +70,9 @@ forth_run(const std::string& code)
     forth_init_words();
     std::istringstream ss(code);
     std::string token;
-    while (ss) {
+    while (1) {
         ss >> token;
+        if (!ss) break;
         if (forth_words.find(token) != forth_words.end()) {
             try {
                 forth_words[token]();
