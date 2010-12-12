@@ -35,13 +35,20 @@ private:
 };
 
 
+ForthValue
+forth_pop_value(const std::string& callee)
+{
+    if (forth_stack.empty()) throw forth_stack_underflow(callee);
+    ForthValue value = forth_stack.top();
+    forth_stack.pop();
+    return value;
+}
+
 void
 word_plus()
 {
-    if (forth_stack.empty()) throw forth_stack_underflow("+");
-    ForthValue x = forth_stack.top(); forth_stack.pop();
-    if (forth_stack.empty()) throw forth_stack_underflow("+");
-    ForthValue y = forth_stack.top(); forth_stack.pop();
+    ForthValue x = forth_pop_value("+");
+    ForthValue y = forth_pop_value("+");
 
     forth_stack.push(x + y);
 }
@@ -49,10 +56,7 @@ word_plus()
 void
 word_print()
 {
-    if (forth_stack.empty()) throw forth_stack_underflow(".");
-    ForthValue x = forth_stack.top(); forth_stack.pop();
-
-    std::cout << x;
+    std::cout << forth_pop_value(".");
 }
 
 void
