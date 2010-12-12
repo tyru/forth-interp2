@@ -9,14 +9,42 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
+#include <stack>
+#include <map>
+#include <boost/lexical_cast.hpp>
+
+
+typedef int ForthValue;
+std::stack<ForthValue> forth_stack;
+
+typedef void (*WordFn)();
+std::map<std::string, WordFn> forth_words;
+
 
 
 void
-run(const std::string& code)
+forth_run(const std::string& code)
 {
-    std::cout << code << std::endl;
+    std::istringstream ss(code);
+    std::string token;
+    while (ss) {
+        ss >> token;
+        if (forth_words.find(token) != forth_words.end()) {
+            forth_words[token]();
+        }
+        else {
+            try {
+                forth_stack.push(boost::lexical_cast<ForthValue>(token));
+            }
+            catch (boost::bad_lexical_cast& e) {
+                std::cerr << "can't convert '" << token << "' to integer." << std::endl;
+            }
+        }
+    }
 }
+
 
 int
 main(int argc, char** argv)
@@ -36,5 +64,5 @@ main(int argc, char** argv)
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
-    run(buf);
+    forth_run(buf);
 }
