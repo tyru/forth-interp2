@@ -125,7 +125,7 @@ public:
                 while (1) {
                     ss >> token;
                     if (!ss) {
-                        std::cerr << "warning: got EOF inside comment." << std::endl;
+                        std::cerr << "[warning]: got EOF inside comment." << std::endl;
                         goto end;
                     }
                     if (token == ")") break;
@@ -136,10 +136,10 @@ public:
                     words_[token](stack_);
                 }
                 catch (stack_underflow& e) {
-                    std::cerr << e.what() << ": no more items on the stack." << std::endl;
+                    std::cerr << "[error]: " << e.what() << ": no more items on the stack." << std::endl;
                 }
                 catch (divide_by_zero& e) {
-                    std::cerr << "divide by zero." << std::endl;
+                    std::cerr << "[error]: divide by zero." << std::endl;
                 }
             }
             else {
@@ -147,7 +147,7 @@ public:
                     stack_.push(boost::lexical_cast<ForthValue>(token));
                 }
                 catch (boost::bad_lexical_cast& e) {
-                    std::cerr << "can't convert '" << token << "' to integer." << std::endl;
+                    std::cerr << "[error]: can't convert '" << token << "' to integer." << std::endl;
                 }
             }
         }
