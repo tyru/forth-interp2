@@ -16,6 +16,9 @@
 #include <boost/lexical_cast.hpp>
 
 
+namespace forth {
+
+
 typedef int ForthValue;
 std::stack<ForthValue> forth_stack;
 
@@ -135,6 +138,9 @@ forth_run(const std::string& code)
 }
 
 
+} // namespace forth
+
+
 int
 main(int argc, char** argv)
 {
@@ -153,5 +159,5 @@ main(int argc, char** argv)
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
-    forth_run(buf);
+    forth::forth_run(buf);
 }
