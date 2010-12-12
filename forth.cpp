@@ -119,7 +119,19 @@ public:
             ss >> token;
             if (!ss) break;
             // std::cerr << "[debug]:" << token << std::endl;
-            if (words_.find(token) != words_.end()) {
+
+            if (token == "(") {
+                // forth's comment. skip until ")".
+                while (1) {
+                    ss >> token;
+                    if (!ss) {
+                        std::cerr << "warning: got EOF inside comment." << std::endl;
+                        goto end;
+                    }
+                    if (token == ")") break;
+                }
+            }
+            else if (words_.find(token) != words_.end()) {
                 try {
                     words_[token](stack_);
                 }
@@ -139,6 +151,8 @@ public:
                 }
             }
         }
+end:
+        ;    // it's the end of .run()
     }
 
 private:
