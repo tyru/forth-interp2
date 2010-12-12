@@ -53,8 +53,8 @@ forth_pop_value(ForthStack& stk, const std::string& callee)
 void
 word_add(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value(stk, "+");
     ForthValue y = forth_pop_value(stk, "+");
+    ForthValue x = forth_pop_value(stk, "+");
 
     stk.push(x + y);
 }
@@ -62,8 +62,8 @@ word_add(ForthStack& stk)
 void
 word_subtract(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value(stk, "-");
     ForthValue y = forth_pop_value(stk, "-");
+    ForthValue x = forth_pop_value(stk, "-");
 
     stk.push(x - y);
 }
@@ -71,8 +71,8 @@ word_subtract(ForthStack& stk)
 void
 word_multiply(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value(stk, "*");
     ForthValue y = forth_pop_value(stk, "*");
+    ForthValue x = forth_pop_value(stk, "*");
 
     stk.push(x * y);
 }
@@ -80,8 +80,8 @@ word_multiply(ForthStack& stk)
 void
 word_divide(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value(stk, "/");
     ForthValue y = forth_pop_value(stk, "/");
+    ForthValue x = forth_pop_value(stk, "/");
 
     if (y == 0) throw divide_by_zero();
     stk.push(x / y);
