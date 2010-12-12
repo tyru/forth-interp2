@@ -23,16 +23,62 @@ typedef void (*WordFn)();
 std::map<std::string, WordFn> forth_words;
 
 
+struct forth_stack_underflow
+{
+    forth_stack_underflow(const std::string& msg)
+        : msg_(msg) {}
+
+    std::string what() throw() { return msg_; }
+
+private:
+    std::string msg_;
+};
+
+
+void
+word_plus()
+{
+    if (forth_stack.empty()) throw forth_stack_underflow("+");
+    ForthValue x = forth_stack.top(); forth_stack.pop();
+    if (forth_stack.empty()) throw forth_stack_underflow("+");
+    ForthValue y = forth_stack.top(); forth_stack.pop();
+
+    forth_stack.push(x + y);
+}
+
+void
+word_print()
+{
+    if (forth_stack.empty()) throw forth_stack_underflow(".");
+    ForthValue x = forth_stack.top(); forth_stack.pop();
+
+    std::cout << x;
+}
+
+void
+forth_init_words()
+{
+    forth_words.clear();
+
+    forth_words["+"] = word_plus;
+    forth_words["."] = word_print;
+}
 
 void
 forth_run(const std::string& code)
 {
+    forth_init_words();
     std::istringstream ss(code);
     std::string token;
     while (ss) {
         ss >> token;
         if (forth_words.find(token) != forth_words.end()) {
-            forth_words[token]();
+            try {
+                forth_words[token]();
+            }
+            catch (forth_stack_underflow& e) {
+                std::cerr << e.what() << ": no more items on the stack." << std::endl;
+            }
         }
         else {
             try {
