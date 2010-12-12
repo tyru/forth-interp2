@@ -2,4 +2,4 @@
 .PHONY: all
 
 all:
-	g++ forth.cpp -o forth
+	g++ -pedantic -W -Wall forth.cpp -o forth
