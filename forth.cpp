@@ -20,10 +20,10 @@ namespace forth {
 
 
 typedef int ForthValue;
-std::stack<ForthValue> forth_stack;
+typedef std::stack<ForthValue> ForthStack;
+typedef void (*WordFn)(ForthStack&);
+typedef std::map<std::string, WordFn> ForthWordMap;
 
-typedef void (*WordFn)();
-std::map<std::string, WordFn> forth_words;
 
 
 struct stack_underflow
@@ -42,100 +42,109 @@ struct divide_by_zero {};
 
 
 ForthValue
-forth_pop_value(const std::string& callee)
+forth_pop_value(ForthStack& stk, const std::string& callee)
 {
-    if (forth_stack.empty()) throw stack_underflow(callee);
-    ForthValue value = forth_stack.top();
-    forth_stack.pop();
+    if (stk.empty()) throw stack_underflow(callee);
+    ForthValue value = stk.top();
+    stk.pop();
     return value;
 }
 
 void
-word_add()
+word_add(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value("+");
-    ForthValue y = forth_pop_value("+");
+    ForthValue x = forth_pop_value(stk, "+");
+    ForthValue y = forth_pop_value(stk, "+");
 
-    forth_stack.push(x + y);
+    stk.push(x + y);
 }
 
 void
-word_subtract()
+word_subtract(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value("-");
-    ForthValue y = forth_pop_value("-");
+    ForthValue x = forth_pop_value(stk, "-");
+    ForthValue y = forth_pop_value(stk, "-");
 
-    forth_stack.push(x - y);
+    stk.push(x - y);
 }
 
 void
-word_multiply()
+word_multiply(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value("*");
-    ForthValue y = forth_pop_value("*");
+    ForthValue x = forth_pop_value(stk, "*");
+    ForthValue y = forth_pop_value(stk, "*");
 
-    forth_stack.push(x * y);
+    stk.push(x * y);
 }
 
 void
-word_divide()
+word_divide(ForthStack& stk)
 {
-    ForthValue x = forth_pop_value("/");
-    ForthValue y = forth_pop_value("/");
+    ForthValue x = forth_pop_value(stk, "/");
+    ForthValue y = forth_pop_value(stk, "/");
 
     if (y == 0) throw divide_by_zero();
-    forth_stack.push(x / y);
+    stk.push(x / y);
 }
 
 void
-word_print()
+word_print(ForthStack& stk)
 {
-    std::cout << forth_pop_value(".");
+    std::cout << forth_pop_value(stk, ".");
 }
 
-void
-forth_init_words()
-{
-    forth_words.clear();
 
-    forth_words["+"] = word_add;
-    forth_words["-"] = word_subtract;
-    forth_words["*"] = word_multiply;
-    forth_words["/"] = word_divide;
-    forth_words["."] = word_print;
-}
-
-void
-forth_run(const std::string& code)
+class ForthInterp
 {
-    forth_init_words();
-    std::istringstream ss(code);
-    std::string token;
-    while (1) {
-        ss >> token;
-        if (!ss) break;
-        // std::cerr << "[debug]:" << token << std::endl;
-        if (forth_words.find(token) != forth_words.end()) {
-            try {
-                forth_words[token]();
+private:
+    void
+    init_words() {
+        words_.clear();
+
+        words_["+"] = word_add;
+        words_["-"] = word_subtract;
+        words_["*"] = word_multiply;
+        words_["/"] = word_divide;
+        words_["."] = word_print;
+    }
+
+public:
+    void
+    run(const std::string& code) {
+        this->init_words();
+        std::istringstream ss(code);
+        std::string token;
+
+        while (1) {
+            ss >> token;
+            if (!ss) break;
+            // std::cerr << "[debug]:" << token << std::endl;
+            if (words_.find(token) != words_.end()) {
+                try {
+                    words_[token](stack_);
+                }
+                catch (stack_underflow& e) {
+                    std::cerr << e.what() << ": no more items on the stack." << std::endl;
+                }
+                catch (divide_by_zero& e) {
+                    std::cerr << "divide by zero." << std::endl;
+                }
             }
-            catch (stack_underflow& e) {
-                std::cerr << e.what() << ": no more items on the stack." << std::endl;
-            }
-            catch (divide_by_zero& e) {
-                std::cerr << "divide by zero." << std::endl;
-            }
-        }
-        else {
-            try {
-                forth_stack.push(boost::lexical_cast<ForthValue>(token));
-            }
-            catch (boost::bad_lexical_cast& e) {
-                std::cerr << "can't convert '" << token << "' to integer." << std::endl;
+            else {
+                try {
+                    stack_.push(boost::lexical_cast<ForthValue>(token));
+                }
+                catch (boost::bad_lexical_cast& e) {
+                    std::cerr << "can't convert '" << token << "' to integer." << std::endl;
+                }
             }
         }
     }
-}
+
+private:
+    ForthWordMap words_;
+    ForthStack stack_;
+};
 
 
 } // namespace forth
@@ -159,5 +168,7 @@ main(int argc, char** argv)
         (std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>()
     );
-    forth::forth_run(buf);
+
+    forth::ForthInterp interp;
+    interp.run(buf);
 }
