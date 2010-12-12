@@ -26,9 +26,9 @@ typedef std::map<std::string, WordFn> ForthWordMap;
 
 
 
-struct stack_underflow
+struct StackUnderflow
 {
-    stack_underflow(const std::string& msg)
+    StackUnderflow(const std::string& msg)
         : msg_(msg) {}
 
     std::string what() throw() { return msg_; }
@@ -37,14 +37,14 @@ private:
     std::string msg_;
 };
 
-struct divide_by_zero {};
+struct DivideByZero {};
 
 
 
 ForthValue
 forth_pop_value(ForthStack& stk, const std::string& callee)
 {
-    if (stk.empty()) throw stack_underflow(callee);
+    if (stk.empty()) throw StackUnderflow(callee);
     ForthValue value = stk.top();
     stk.pop();
     return value;
@@ -83,7 +83,7 @@ word_divide(ForthStack& stk)
     ForthValue y = forth_pop_value(stk, "/");
     ForthValue x = forth_pop_value(stk, "/");
 
-    if (y == 0) throw divide_by_zero();
+    if (y == 0) throw DivideByZero();
     stk.push(x / y);
 }
 
@@ -135,10 +135,10 @@ public:
                 try {
                     words_[token](stack_);
                 }
-                catch (stack_underflow& e) {
+                catch (StackUnderflow& e) {
                     std::cerr << "[error]: " << e.what() << ": no more items on the stack." << std::endl;
                 }
-                catch (divide_by_zero& e) {
+                catch (DivideByZero& e) {
                     std::cerr << "[error]: divide by zero." << std::endl;
                 }
             }
